@@ -277,7 +277,7 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>6</integer>
+									<integer>5</integer>
 									<integer>4</integer>
 									<integer>3</integer>
 									<integer>0</integer>
@@ -303,7 +303,7 @@
 							<real>276</real>
 						</array>
 						<key>RubberWindowFrame</key>
-						<string>605 183 1183 875 0 0 1920 1058 </string>
+						<string>543 69 1183 875 0 0 1920 1058 </string>
 					</dict>
 					<key>Module</key>
 					<string>PBXSmartGroupTreeModule</string>
@@ -319,7 +319,7 @@
 								<key>PBXProjectModuleGUID</key>
 								<string>1CE0B20306471E060097A5F4</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>GaussianProcess.h</string>
+								<string>trackingManager.cpp</string>
 								<key>PBXSplitModuleInNavigatorKey</key>
 								<dict>
 									<key>Split0</key>
@@ -327,11 +327,11 @@
 										<key>PBXProjectModuleGUID</key>
 										<string>1CE0B20406471E060097A5F4</string>
 										<key>PBXProjectModuleLabel</key>
-										<string>GaussianProcess.h</string>
+										<string>trackingManager.cpp</string>
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>44DD728613082603006E9AA7</string>
+										<string>4409D9D813097AC20057948D</string>
 										<key>history</key>
 										<array>
 											<string>44F1681F12EDDFB000FD8BEB</string>
@@ -396,10 +396,10 @@
 											<string>44D8557D1306EF6500695E8F</string>
 											<string>44D8558B1306F11500695E8F</string>
 											<string>44DD72041308176C006E9AA7</string>
-											<string>44DD727913082451006E9AA7</string>
 											<string>44DD728313082603006E9AA7</string>
-											<string>44DD728413082603006E9AA7</string>
-											<string>44DD728513082603006E9AA7</string>
+											<string>4409D9D513097AC20057948D</string>
+											<string>4409D9D613097AC20057948D</string>
+											<string>4409D9D713097AC20057948D</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -411,14 +411,14 @@
 							<key>GeometryConfiguration</key>
 							<dict>
 								<key>Frame</key>
-								<string>{{0, 0}, {885, 532}}</string>
+								<string>{{0, 0}, {885, 524}}</string>
 								<key>RubberWindowFrame</key>
-								<string>605 183 1183 875 0 0 1920 1058 </string>
+								<string>543 69 1183 875 0 0 1920 1058 </string>
 							</dict>
 							<key>Module</key>
 							<string>PBXNavigatorGroup</string>
 							<key>Proportion</key>
-							<string>532pt</string>
+							<string>524pt</string>
 						</dict>
 						<dict>
 							<key>ContentConfiguration</key>
@@ -431,14 +431,14 @@
 							<key>GeometryConfiguration</key>
 							<dict>
 								<key>Frame</key>
-								<string>{{0, 537}, {885, 297}}</string>
+								<string>{{0, 529}, {885, 305}}</string>
 								<key>RubberWindowFrame</key>
-								<string>605 183 1183 875 0 0 1920 1058 </string>
+								<string>543 69 1183 875 0 0 1920 1058 </string>
 							</dict>
 							<key>Module</key>
 							<string>XCDetailModule</string>
 							<key>Proportion</key>
-							<string>297pt</string>
+							<string>305pt</string>
 						</dict>
 					</array>
 					<key>Proportion</key>
@@ -457,9 +457,9 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>44DD71D313081334006E9AA7</string>
+				<string>4409D9C8130977BC0057948D</string>
 				<string>1CE0B1FE06471DED0097A5F4</string>
-				<string>44DD71D413081334006E9AA7</string>
+				<string>4409D9C9130977BC0057948D</string>
 				<string>1CE0B20306471E060097A5F4</string>
 				<string>1CE0B20506471E060097A5F4</string>
 			</array>
@@ -597,15 +597,11 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
-		<string>44DD71E41308142C006E9AA7</string>
-		<string>44DD71E51308142C006E9AA7</string>
-		<string>1C78EAAD065D492600B07095</string>
-		<string>1CD10A99069EF8BA00B06720</string>
 		<string>44F1666512EDCB4D00FD8BEB</string>
 		<string>/Users/sugano/Documents/of_preRelease_v0062/apps/MyApps/eyeWriterCam/eyeWriterCam.xcodeproj</string>
 	</array>
 	<key>WindowString</key>
-	<string>605 183 1183 875 0 0 1920 1058 </string>
+	<string>543 69 1183 875 0 0 1920 1058 </string>
 	<key>WindowToolsV3</key>
 	<array>
 		<dict>
@@ -621,12 +617,14 @@
 					<key>Dock</key>
 					<array>
 						<dict>
+							<key>BecomeActive</key>
+							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>
 								<string>1CD0528F0623707200166675</string>
 								<key>PBXProjectModuleLabel</key>
-								<string></string>
+								<string>trackingManager.cpp</string>
 								<key>StatusBarVisibility</key>
 								<true/>
 							</dict>
@@ -682,7 +680,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>44F1666512EDCB4D00FD8BEB</string>
-				<string>44DD71D513081334006E9AA7</string>
+				<string>4409D9CA130977BC0057948D</string>
 				<string>1CD0528F0623707200166675</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 			</array>

@@ -106,7 +106,7 @@ void trackingManager::update(){
 			// add current eye images
 			calibrationEyes.push_back(bEye.clone());
 			IplImage eye_temp = bEye;
-			gazeEstimator.AddExampler(&eye_temp, calibrationPoints[calibPtIdx].x, calibrationPoints[calibPtIdx].y);
+			gazeEstimator.AddExemplar(&eye_temp, calibrationPoints[calibPtIdx].x, calibrationPoints[calibPtIdx].y);
 			
 			calibPtIdx++;
 			calibPtRad = calibPointsRadMax;

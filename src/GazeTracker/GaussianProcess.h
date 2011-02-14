@@ -22,7 +22,7 @@ public:
 	CGaussianProcess(void);
 	~CGaussianProcess(void);
 
-	void AddExampler(IplImage *image, double label);
+	void AddExemplar(IplImage *image, double label);
 	double GetMean(IplImage *testimage, double scale, double sigma);
 
 	// leave-one-out cross validation
@@ -35,8 +35,8 @@ public:
 	void UpdateGPMatrices(double noise, double scale, double sigma);
 
 private:
-	std::vector<IplImage*> m_ExamplerImages;
-	std::vector<double> m_ExamplerLabels;
+	std::vector<IplImage*> m_ExemplarImages;
+	std::vector<double> m_ExemplarLabels;
 	
 	void GetFourierMagnitudeEye(IplImage *src, IplImage *dst);
 
@@ -61,7 +61,7 @@ public:
 	CGazeEstimator(void);
 	~CGazeEstimator(void);
 
-	void AddExampler(IplImage *image, double labelx, double labely);
+	void AddExemplar(IplImage *image, double labelx, double labely);
 	void Reset();
 	void Update(int areaWidth, int areaHeight);
 	

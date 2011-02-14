@@ -46,8 +46,8 @@ CGaussianProcess::~CGaussianProcess(void)
 	if(m_GP_y != NULL) cvReleaseMat(&m_GP_y);
 	if(m_GP_Alpha != NULL) cvReleaseMat(&m_GP_Alpha);
 	
-	for(int i=0; i<m_ExamplerImages.size(); i++)
-		cvReleaseImage(&m_ExamplerImages[i]);
+	for(int i=0; i<m_ExemplarImages.size(); i++)
+		cvReleaseImage(&m_ExemplarImages[i]);
 }
 
 void CGaussianProcess::Clear()
@@ -56,21 +56,21 @@ void CGaussianProcess::Clear()
 	if(m_GP_y != NULL) cvReleaseMat(&m_GP_y);
 	if(m_GP_Alpha != NULL) cvReleaseMat(&m_GP_Alpha);
 	
-	for(int i=0; i<m_ExamplerImages.size(); i++)
-		cvReleaseImage(&m_ExamplerImages[i]);
+	for(int i=0; i<m_ExemplarImages.size(); i++)
+		cvReleaseImage(&m_ExemplarImages[i]);
 	
-	m_ExamplerImages.clear();
-	m_ExamplerLabels.clear();
+	m_ExemplarImages.clear();
+	m_ExemplarLabels.clear();
 }
 
-void CGaussianProcess::AddExampler(IplImage *image, double label)
+void CGaussianProcess::AddExemplar(IplImage *image, double label)
 {
 	//IplImage *new_image = cvCloneImage(image);
 	IplImage *new_image = cvCreateImage(cvGetSize(image), IPL_DEPTH_32F, 1);
 	GetFourierMagnitudeEye(image, new_image);
 	
-	m_ExamplerImages.push_back(new_image);
-	m_ExamplerLabels.push_back(label);
+	m_ExemplarImages.push_back(new_image);
+	m_ExemplarLabels.push_back(label);
 }
 
 double CGaussianProcess::CalcCovariance(IplImage *img1, IplImage *img2, double scale, double sigma)
@@ -82,16 +82,16 @@ double CGaussianProcess::CalcCovariance(IplImage *img1, IplImage *img2, double s
 
 void CGaussianProcess::GetCovarianceMatrix(CvMat *K, double noise, double scale, double sigma)
 {
-	int ex_num = m_ExamplerLabels.size();
+	int ex_num = m_ExemplarLabels.size();
 	
 	for(int i=0; i<ex_num; i++)
 	{
-		cvmSet(K, i, i, CalcCovariance(m_ExamplerImages[i], m_ExamplerImages[i], scale, sigma) + noise*noise);
+		cvmSet(K, i, i, CalcCovariance(m_ExemplarImages[i], m_ExemplarImages[i], scale, sigma) + noise*noise);
 		
 		for(int j=i+1; j<ex_num; j++)
 		{
-			cvmSet(K, i, j, CalcCovariance(m_ExamplerImages[i], m_ExamplerImages[j], scale, sigma));
-			cvmSet(K, j, i, CalcCovariance(m_ExamplerImages[i], m_ExamplerImages[j], scale, sigma));
+			cvmSet(K, i, j, CalcCovariance(m_ExemplarImages[i], m_ExemplarImages[j], scale, sigma));
+			cvmSet(K, j, i, CalcCovariance(m_ExemplarImages[i], m_ExemplarImages[j], scale, sigma));
 		}
 	}
 }
@@ -167,7 +167,7 @@ void CGaussianProcess::CholeskySolve(CvMat *L, CvMat *y, CvMat *alpha)
 
 void CGaussianProcess::UpdateGPMatrices(double noise, double scale, double sigma)
 {
-	int ex_num = m_ExamplerLabels.size();
+	int ex_num = m_ExemplarLabels.size();
 	
 	CvMat *K = cvCreateMat(ex_num, ex_num, CV_64FC1);
 	GetCovarianceMatrix(K, noise, scale, sigma);
@@ -180,7 +180,7 @@ void CGaussianProcess::UpdateGPMatrices(double noise, double scale, double sigma
 
 double CGaussianProcess::GetLOOLPP(double noise, double scale, double sigma)
 {
-	int ex_num = m_ExamplerLabels.size();
+	int ex_num = m_ExemplarLabels.size();
 	
 	/*----- set up -----*/
 	CvMat *K, *L, *E, *Alpha, *Kinv;
@@ -220,7 +220,7 @@ double CGaussianProcess::GetLOOLPP(double noise, double scale, double sigma)
 
 void CGaussianProcess::GetDerLOOLPP(double noise, double scale, double sigma, double *d_noise, double *d_scale, double *d_sigma)
 {
-	int ex_num = m_ExamplerLabels.size();
+	int ex_num = m_ExemplarLabels.size();
 	
 	/*----- set up -----*/
 	CvMat *K, *L, *E, *Kinv, *dKda, *dKdb, *dKds, *Za, *Zb, *Zs, *ZaK, *ZbK, *ZsK;
@@ -262,7 +262,7 @@ void CGaussianProcess::GetDerLOOLPP(double noise, double scale, double sigma, do
 		
 		for(int j=i+1; j<ex_num; j++)
 		{
-			double norm = cvNorm(m_ExamplerImages[i], m_ExamplerImages[j], CV_L2);
+			double norm = cvNorm(m_ExemplarImages[i], m_ExemplarImages[j], CV_L2);
 			double a_temp = exp(-pow(norm,2)/(2*pow(sigma,2)));
 			double s_temp = (scale*pow(norm,2)*exp(-pow(norm,2)/(2*pow(sigma,2))))/pow(sigma,3);
 			
@@ -319,15 +319,15 @@ void CGaussianProcess::GetDerLOOLPP(double noise, double scale, double sigma, do
 // allocate basic matrices
 void CGaussianProcess::SetUp()
 {
-	assert(m_ExamplerImages.size() == m_ExamplerLabels.size());
-	int ex_num = m_ExamplerLabels.size();
+	assert(m_ExemplarImages.size() == m_ExemplarLabels.size());
+	int ex_num = m_ExemplarLabels.size();
 	
 	//cout << "Total " << ex_num << " points" << endl;
 	
 	m_Mean = 0.0;
 	for(int i=0; i<ex_num; i++)
 	{
-		m_Mean += m_ExamplerLabels[i];
+		m_Mean += m_ExemplarLabels[i];
 	}
 	m_Mean /= ex_num;
 	
@@ -340,7 +340,7 @@ void CGaussianProcess::SetUp()
 	m_GP_y = cvCreateMat(ex_num, 1, CV_64FC1);
 	for(int i=0; i<ex_num; i++)
 	{
-		cvmSet(m_GP_y, i, 0, (m_ExamplerLabels[i] - m_Mean)/m_Scale);
+		cvmSet(m_GP_y, i, 0, (m_ExemplarLabels[i] - m_Mean)/m_Scale);
 	}
 	
 	m_GP_L = cvCreateMat(ex_num, ex_num, CV_64FC1);
@@ -349,8 +349,8 @@ void CGaussianProcess::SetUp()
 
 void CGaussianProcess::SetUp(double mean, double scale)
 {
-	assert(m_ExamplerImages.size() == m_ExamplerLabels.size());
-	int ex_num = m_ExamplerLabels.size();
+	assert(m_ExemplarImages.size() == m_ExemplarLabels.size());
+	int ex_num = m_ExemplarLabels.size();
 	
 	//cout << "Total " << ex_num << " points" << endl;
 	
@@ -364,7 +364,7 @@ void CGaussianProcess::SetUp(double mean, double scale)
 	m_GP_y = cvCreateMat(ex_num, 1, CV_64FC1);
 	for(int i=0; i<ex_num; i++)
 	{
-		cvmSet(m_GP_y, i, 0, (m_ExamplerLabels[i] - m_Mean)/m_Scale);
+		cvmSet(m_GP_y, i, 0, (m_ExemplarLabels[i] - m_Mean)/m_Scale);
 	}
 	
 	m_GP_L = cvCreateMat(ex_num, ex_num, CV_64FC1);
@@ -438,8 +438,8 @@ void CGaussianProcess::GetFourierMagnitudeEye(IplImage *src, IplImage *dst)
 
 double CGaussianProcess::GetMean(IplImage *testimage, double scale, double sigma)
 {
-	assert(m_ExamplerImages.size() == m_ExamplerLabels.size());
-	int ex_num = m_ExamplerLabels.size();
+	assert(m_ExemplarImages.size() == m_ExemplarLabels.size());
+	int ex_num = m_ExemplarLabels.size();
 	
 	IplImage *new_testimage = cvCreateImage(cvGetSize(testimage), IPL_DEPTH_32F, 1);
 	GetFourierMagnitudeEye(testimage, new_testimage);
@@ -448,7 +448,7 @@ double CGaussianProcess::GetMean(IplImage *testimage, double scale, double sigma
 	
 	for(int i=0; i<ex_num; i++)
 	{
-		cvmSet(KK, 0, i, CalcCovariance(m_ExamplerImages[i], new_testimage, scale, sigma));
+		cvmSet(KK, 0, i, CalcCovariance(m_ExemplarImages[i], new_testimage, scale, sigma));
 	}
 	
 	CvMat *f = cvCreateMat(1, 1, CV_64FC1);
@@ -479,10 +479,10 @@ CGazeEstimator::~CGazeEstimator(void)
 {
 }
 
-void CGazeEstimator::AddExampler(IplImage *image, double labelx, double labely)
+void CGazeEstimator::AddExemplar(IplImage *image, double labelx, double labely)
 {
-	m_GPx.AddExampler(image, labelx);
-	m_GPy.AddExampler(image, labely);
+	m_GPx.AddExemplar(image, labelx);
+	m_GPy.AddExemplar(image, labely);
 }
 
 double CGazeEstimator::GetGradient(double noisex, double noisey, double scale, double sigma, 
