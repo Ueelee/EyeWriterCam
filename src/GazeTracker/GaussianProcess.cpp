@@ -25,7 +25,7 @@ void GradientWrapperForGC(const real_1d_array &x, double &func, real_1d_array &g
 	func = ge->GetGradient(noisex, noisey, scale, sigma, 
 						   &d_noisex, &d_noisey, &d_scale, &d_sigma);
 	
-	//cout << noisex << ", " << noisey << ", " << scale << ", " << sigma << ": " << -func << endl;
+	cout << noisex << ", " << noisey << ", " << scale << ", " << sigma << ": " << -func << endl;
 	
 	grad[0] = d_noisex;
 	grad[1] = d_noisey;
@@ -65,9 +65,16 @@ void CGaussianProcess::Clear()
 
 void CGaussianProcess::AddExemplar(IplImage *image, double label)
 {
-	//IplImage *new_image = cvCloneImage(image);
-	IplImage *new_image = cvCreateImage(cvGetSize(image), IPL_DEPTH_32F, 1);
-	GetFourierMagnitudeEye(image, new_image);
+	IplImage *new_image;
+	if(m_useFourierImage)
+	{
+		new_image = cvCreateImage(cvGetSize(image), IPL_DEPTH_32F, 1);
+		GetFourierMagnitudeEye(image, new_image);
+	}
+	else
+	{
+		new_image = cvCloneImage(image);
+	}
 	
 	m_ExemplarImages.push_back(new_image);
 	m_ExemplarLabels.push_back(label);
@@ -441,8 +448,16 @@ double CGaussianProcess::GetMean(IplImage *testimage, double scale, double sigma
 	assert(m_ExemplarImages.size() == m_ExemplarLabels.size());
 	int ex_num = m_ExemplarLabels.size();
 	
-	IplImage *new_testimage = cvCreateImage(cvGetSize(testimage), IPL_DEPTH_32F, 1);
-	GetFourierMagnitudeEye(testimage, new_testimage);
+	IplImage *new_testimage;
+	if(m_useFourierImage)
+	{
+		new_testimage = cvCreateImage(cvGetSize(testimage), IPL_DEPTH_32F, 1);
+		GetFourierMagnitudeEye(testimage, new_testimage);
+	}
+	else
+	{
+		new_testimage = cvCloneImage(testimage);
+	}
 	
 	CvMat *KK = cvCreateMat(1, ex_num, CV_64FC1);
 	
@@ -467,10 +482,20 @@ double CGaussianProcess::GetMean(IplImage *testimage, double scale, double sigma
 
 CGazeEstimator::CGazeEstimator(void)
 {
-	m_NoiseX = 0.01;
-	m_NoiseY = 0.01;
-	m_Scale = 50.0;
-	m_Sigma = 3.0;
+	if(CGaussianProcess::m_useFourierImage)
+	{
+		m_NoiseX = 0.01;
+		m_NoiseY = 0.01;
+		m_Scale = 50.0;
+		m_Sigma = 3.0;
+	}
+	else
+	{
+		m_NoiseX = 0.01;
+		m_NoiseY = 0.01;
+		m_Scale = 0.5;
+		m_Sigma = 1000.0;
+	}
 	
 	m_isUpdated = false;
 }
@@ -508,7 +533,7 @@ void CGazeEstimator::UpdateParameters()
 {
 	real_1d_array x;
 	double epsg = 0;
-	double epsf = 1E-2;
+	double epsf = 1E-3;
 	double epsx = 0;
 	double stpmax = 1.0;
 	ae_int_t maxits = 100;
