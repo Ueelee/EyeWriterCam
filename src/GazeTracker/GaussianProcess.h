@@ -33,6 +33,8 @@ public:
 	void SetUp(double mean, double scale);
 	void Clear();
 	void UpdateGPMatrices(double noise, double scale, double sigma);
+	
+	static const bool m_useFourierImage = false;
 
 private:
 	std::vector<IplImage*> m_ExemplarImages;
@@ -48,10 +50,8 @@ private:
 	void CholeskyDecomp(CvMat *K, CvMat *L);
 	void CholeskySolve(CvMat *L, CvMat *y, CvMat *alpha);
 
-	//void GetCovarianceMatrix(CvMat *K);
 	void GetCovarianceMatrix(CvMat *K, double noise, double scale, double sigma);
 
-	//double CalcCovariance(IplImage *img1, IplImage *img2);
 	double CalcCovariance(IplImage *img1, IplImage *img2, double scale, double sigma);
 };
 

@@ -42,8 +42,8 @@ private:
 	ofxCvColorImage dispImage;
 	void updateDispImage();
 	
-	static const int eyeImageWidth = 80; // for bEye (combined image of both eyes)
-	static const int eyeImageHeight = 20;
+	static const int eyeImageHeight = 10;
+	static const int eyeImageWidth = 4*eyeImageHeight;
 	Mat bEye, lEye, rEye;
 	bool grabEyeImages();
 	
@@ -60,7 +60,7 @@ private:
 	// eye detection
 	bool detectEyes();
 	static const int numEyePositions = 4;
-	static const int eyeTemplateSize = 20;
+	static const int eyeTemplateSize = 25;
 	static const int maxEyeHistory = 10;
 	std::deque<cv::Point2f> eyeHistories[numEyePositions];
 	cv::CascadeClassifier faceCascade;

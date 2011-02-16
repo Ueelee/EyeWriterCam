@@ -188,10 +188,10 @@ bool trackingManager::grabEyeImages(){
 	
 	Mat img(sourceImage);
 	Mat EyeRaw(eyeImageHeight, eyeImageWidth/2, CV_8UC1);
-	double sigmaColor = 20;
-	double sigmaSpace = 3;
+	static const double sigmaColor = 10;
+	static const double sigmaSpace = 3;
 	
-	static const int offset = round(eyeImageWidth/30);
+	static const int offset = round(eyeImageWidth/20);
 	static const Point2f dst[] = {
 		Point2f(offset, 0),
 		Point2f(offset, eyeImageHeight/2),
@@ -314,7 +314,7 @@ bool trackingManager::trackEyes()
 	Mat initV(cv::Size(rw,rw), CV_32FC1);
 	Mat prevV(cv::Size(rw,rw), CV_32FC1);
 	Mat resultV(cv::Size(rw,rw), CV_32FC1);
-	double alpha = 1.0; // resultV = initV + alpha*resultV
+	double alpha = 2.0; // resultV = initV + alpha*prevV
 	
 	for (int i=0; i<numEyePositions; i++) {
 		cv::Rect roi(eyePositions[i].x-searchWindowSize/2, eyePositions[i].y-searchWindowSize/2, 
