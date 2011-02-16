@@ -330,7 +330,7 @@
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>443B168A130C2A0000095D22</string>
+										<string>443B168E130C2BAF00095D22</string>
 										<key>history</key>
 										<array>
 											<string>44F1681F12EDDFB000FD8BEB</string>
@@ -598,9 +598,9 @@
 	<array>
 		<string>443B165B130C24B600095D22</string>
 		<string>443B165C130C24B600095D22</string>
+		<string>1C78EAAD065D492600B07095</string>
 		<string>1CD10A99069EF8BA00B06720</string>
 		<string>44F1666512EDCB4D00FD8BEB</string>
-		<string>1C78EAAD065D492600B07095</string>
 		<string>/Users/sugano/Documents/of_preRelease_v0062/apps/MyApps/eyeWriterCam/eyeWriterCam.xcodeproj</string>
 	</array>
 	<key>WindowString</key>
@@ -975,7 +975,7 @@
 			<key>WindowToolGUID</key>
 			<string>1C78EAAD065D492600B07095</string>
 			<key>WindowToolIsVisible</key>
-			<true/>
+			<false/>
 		</dict>
 		<dict>
 			<key>Identifier</key>
