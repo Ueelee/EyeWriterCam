@@ -11,28 +11,6 @@ using namespace alglib;
 
 static const double PI = 6*asin(0.5);
 
-// global function for GC optimization
-void GradientWrapperForGC(const real_1d_array &x, double &func, real_1d_array &grad, void *ptr)
-{
-	CGazeEstimator *ge = (CGazeEstimator*)ptr;
-	
-	double noisex = x[0];
-	double noisey = x[1];
-	double scale = x[2];
-	double sigma = x[3];
-	
-	double d_noisex, d_noisey, d_scale, d_sigma;
-	func = ge->GetGradient(noisex, noisey, scale, sigma, 
-						   &d_noisex, &d_noisey, &d_scale, &d_sigma);
-	
-	cout << noisex << ", " << noisey << ", " << scale << ", " << sigma << ": " << -func << endl;
-	
-	grad[0] = d_noisex;
-	grad[1] = d_noisey;
-	grad[2] = d_scale;
-	grad[3] = d_sigma;
-}
-
 CGaussianProcess::CGaussianProcess(void)
 {
 	m_GP_L = NULL;
@@ -65,16 +43,7 @@ void CGaussianProcess::Clear()
 
 void CGaussianProcess::AddExemplar(IplImage *image, double label)
 {
-	IplImage *new_image;
-	if(m_useFourierImage)
-	{
-		new_image = cvCreateImage(cvGetSize(image), IPL_DEPTH_32F, 1);
-		GetFourierMagnitudeEye(image, new_image);
-	}
-	else
-	{
-		new_image = cvCloneImage(image);
-	}
+	IplImage *new_image = cvCloneImage(image);
 	
 	m_ExemplarImages.push_back(new_image);
 	m_ExemplarLabels.push_back(label);
@@ -378,86 +347,12 @@ void CGaussianProcess::SetUp(double mean, double scale)
 	m_GP_Alpha = cvCreateMat(ex_num, 1, CV_64FC1);
 }
 
-void CGaussianProcess::GetFourierMagnitudeEye(IplImage *src, IplImage *dst)
-{
-	int width = src->width/2;
-	int height = src->height;
-	
-	IplImage *real = cvCreateImage(cvSize(width, height), IPL_DEPTH_64F, 1);
-	IplImage *image = cvCreateImage(cvSize(width, height), IPL_DEPTH_64F, 1);
-	IplImage *fft = cvCreateImage(cvSize(width, height), IPL_DEPTH_64F, 2);
-	IplImage *result = cvCreateImage(cvSize(width, height), IPL_DEPTH_64F, 1);
-	
-	/*-----left eye-----*/
-	cvSetImageROI(src, cvRect(0, 0, width, height));
-	cvSetImageROI(dst, cvRect(0, 0, width, height));
-	
-	// make complex data
-	cvConvertScale(src, real);
-	cvZero(image);
-	cvMerge(real, image, NULL, NULL, fft);
-	
-	cvDFT(fft, fft, CV_DXT_FORWARD);
-	
-	// compute magnitudes
-	cvSplit(fft, real, image, NULL, NULL);
-	cvPow(real, real, 2);
-	cvPow(image, image, 2);
-	cvAdd(real, image, result);
-	cvPow(result, result, 0.5);
-	
-	// normalize & copy result
-	cvNormalize(result, result, 1.0, 0.0, CV_MINMAX);
-	cvConvertScale(result, dst);
-	/*-----left eye-----*/
-	
-	/*-----right eye-----*/
-	cvSetImageROI(src, cvRect(width, 0, width, height));
-	cvSetImageROI(dst, cvRect(width, 0, width, height));
-	
-	// make complex data
-	cvConvertScale(src, real);
-	cvZero(image);
-	cvMerge(real, image, NULL, NULL, fft);
-	
-	cvDFT(fft, fft, CV_DXT_FORWARD);
-	
-	// compute magnitudes
-	cvSplit(fft, real, image, NULL, NULL);
-	cvPow(real, real, 2);
-	cvPow(image, image, 2);
-	cvAdd(real, image, result);
-	cvPow(result, result, 0.5);
-	
-	// normalize & copy result
-	cvNormalize(result, result, 1.0, 0.0, CV_MINMAX);
-	cvConvertScale(result, dst);
-	/*-----right eye-----*/
-	
-	cvResetImageROI(src);
-	cvResetImageROI(dst);
-	
-	cvReleaseImage(&real);
-	cvReleaseImage(&image);
-	cvReleaseImage(&fft);
-	cvReleaseImage(&result);
-}
-
 double CGaussianProcess::GetMean(IplImage *testimage, double scale, double sigma)
 {
 	assert(m_ExemplarImages.size() == m_ExemplarLabels.size());
 	int ex_num = m_ExemplarLabels.size();
 	
-	IplImage *new_testimage;
-	if(m_useFourierImage)
-	{
-		new_testimage = cvCreateImage(cvGetSize(testimage), IPL_DEPTH_32F, 1);
-		GetFourierMagnitudeEye(testimage, new_testimage);
-	}
-	else
-	{
-		new_testimage = cvCloneImage(testimage);
-	}
+	IplImage *new_testimage = cvCloneImage(testimage);
 	
 	CvMat *KK = cvCreateMat(1, ex_num, CV_64FC1);
 	
@@ -476,125 +371,4 @@ double CGaussianProcess::GetMean(IplImage *testimage, double scale, double sigma
 	cvReleaseMat(&f);
 	
 	return mean;
-}
-
-/* CGazeEstimator Class */
-
-CGazeEstimator::CGazeEstimator(void)
-{
-	if(CGaussianProcess::m_useFourierImage)
-	{
-		m_NoiseX = 0.01;
-		m_NoiseY = 0.01;
-		m_Scale = 50.0;
-		m_Sigma = 3.0;
-	}
-	else
-	{
-		m_NoiseX = 0.01;
-		m_NoiseY = 0.01;
-		m_Scale = 0.5;
-		m_Sigma = 1000.0;
-	}
-	
-	m_isUpdated = false;
-}
-
-CGazeEstimator::~CGazeEstimator(void)
-{
-}
-
-void CGazeEstimator::AddExemplar(IplImage *image, double labelx, double labely)
-{
-	m_GPx.AddExemplar(image, labelx);
-	m_GPy.AddExemplar(image, labely);
-}
-
-double CGazeEstimator::GetGradient(double noisex, double noisey, double scale, double sigma, 
-								   double *d_noisex, double *d_noisey, double *d_scale, double *d_sigma)
-{
-	// minimize -> maximize
-	*d_noisex = 0.0, *d_noisey = 0.0, *d_sigma = 0.0, *d_scale = 0.0;
-	
-	m_GPx.GetDerLOOLPP(noisex, scale, sigma, d_noisex, d_scale, d_sigma);
-	m_GPy.GetDerLOOLPP(noisey, scale, sigma, d_noisey, d_scale, d_sigma);
-	
-	*d_noisex *= -1;
-	*d_noisey *= -1;
-	*d_sigma *= -1;
-	*d_scale *= -1;
-	
-	double val = m_GPx.GetLOOLPP(noisex, scale, sigma) + m_GPy.GetLOOLPP(noisey, scale, sigma);
-	
-	return -val;
-}
-
-void CGazeEstimator::UpdateParameters()
-{
-	real_1d_array x;
-	double epsg = 0;
-	double epsf = 1E-3;
-	double epsx = 0;
-	double stpmax = 1.0;
-	ae_int_t maxits = 100;
-	mincgstate state;
-	mincgreport rep;
-	
-	// initial states
-	double init = m_GPx.GetLOOLPP(m_NoiseX, m_Scale, m_Sigma) + m_GPy.GetLOOLPP(m_NoiseY, m_Scale, m_Sigma);
-	//cout << m_NoiseX << ", " << m_NoiseY << ", " << m_Scale << ", " << m_Sigma << ": " << init << endl;
-	x.setlength(4);
-	x[0] = m_NoiseX;
-	x[1] = m_NoiseY;
-	x[2] = m_Scale;
-	x[3] = m_Sigma;
-	
-	mincgcreate(x, state);
-	mincgsetcond(state, epsg, epsf, epsx, maxits);
-	mincgsetstpmax(state, stpmax);
-	mincgoptimize(state, GradientWrapperForGC, NULL, this);
-	mincgresults(state, x, rep);
-	
-	// parse results
-	m_NoiseX = abs(x[0]);
-	m_NoiseY = abs(x[1]);
-	m_Scale = abs(x[2]);
-	m_Sigma = abs(x[3]);
-	double result = m_GPx.GetLOOLPP(m_NoiseX, m_Scale, m_Sigma) + m_GPy.GetLOOLPP(m_NoiseY, m_Scale, m_Sigma);
-	cout << "Updated parameters:" << endl;
-	cout << "m_NoiseX = " << m_NoiseX << endl;
-	cout << "m_NoiseY = " << m_NoiseY << endl;
-	cout << "m_Scale = " << m_Scale << endl;
-	cout << "m_Sigma = " << m_Sigma << endl;
-}
-
-void CGazeEstimator::Reset()
-{
-	m_GPx.Clear();
-	m_GPy.Clear();
-	
-	m_isUpdated = false;
-}
-
-void CGazeEstimator::Update(int areaWidth, int areaHeight)
-{
-	m_GPx.SetUp(areaWidth/2, areaWidth/2);
-	m_GPy.SetUp(areaHeight/2, areaHeight/2);
-	
-	UpdateParameters();
-	
-	m_GPx.UpdateGPMatrices(m_NoiseX, m_Scale, m_Sigma);
-	m_GPy.UpdateGPMatrices(m_NoiseY, m_Scale, m_Sigma);
-	
-	m_isUpdated = true;
-}
-
-bool CGazeEstimator::GetMean(IplImage *testimage, double mean[2])
-{
-	if(!m_isUpdated) return false;
-	
-	mean[0] = m_GPx.GetMean(testimage, m_Scale, m_Sigma);
-	mean[1] = m_GPy.GetMean(testimage, m_Scale, m_Sigma);
-	
-	return true;
 }

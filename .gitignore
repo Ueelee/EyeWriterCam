@@ -7,3 +7,9 @@ build/
 *.pbxuser
 *.perspective
 *.perspectivev3
+
+bin/*.app
+bin/data/model/*
+
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj

@@ -2,7 +2,8 @@
 
 //--------------------------------------------------------------
 void testApp::setup(){
-	
+	ofEnableAlphaBlending();
+    
 	mode = MODE_TRACKING;
 	
 	eyeSmoothed.set(0,0,0);

@@ -1,4 +1,9 @@
 Camera-based EyeWriter implementation
-Licensed under GNU General Public License v2
 
-Try your best to fix your head position by resting your chin in hands!!
+Tested on oFv007, and requires following addons:
+https://github.com/kylemcdonald/ofxCv
+https://github.com/kylemcdonald/ofxFaceTracker
+You need to place the model data of the face tracker in "bin/data/model/".
+
+This project contains ALGLIB library licensed under GNU General Public License v2.
+http://www.alglib.net/

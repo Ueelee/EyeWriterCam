@@ -1,23 +1,22 @@
 /*
- *  trackingManager.h
- *  eyeWriterCam
+ *  trackingManager
  *
- *  Created by sugano on 11/01/25.
+ *  Created by ysugano on 11/01/25.
  *
  */
 
-#ifndef _TRACKSCENE_H
-#define _TRACKSCENE_H
+#ifndef trackingManager_h
+#define trackingManager_h
 
 #include <deque>
 
-#include "inputManager.h"
-#include "GaussianProcess.h"
+#include "GazeEstimator.h"
+
+#include "ofxFaceTracker.h"
+#include "ofxOpenCv.h"
+#include "ofxCv.h"
 
 #include "cv.h"
-
-#include "asmmodel.h"
-#include "modelfile.h"
 #include "util.h"
 
 class trackingManager {
@@ -36,51 +35,46 @@ public:
 	void keyPressed(int key);
 	
 private:
-	void grabFrame();
-	
-	IplImage *sourceImage, *colorImage;
+    cv::Mat grayImage, colorImage;
 	ofxCvColorImage dispImage;
 	void updateDispImage();
 	
-	static const int eyeImageHeight = 10;
+	static const int eyeImageHeight = 5;
 	static const int eyeImageWidth = 4*eyeImageHeight;
-	Mat bEye, lEye, rEye;
+	static const int eyeOffset = eyeImageHeight/5;
+    cv::Mat bEye, lEye, rEye, meanEye;
 	bool grabEyeImages();
-	
-	inputManager IM;
 	
 	ofTrueTypeFont dispFont;
 	
 	enum trackingModes{
-		TM_MODE_DETECTION,
 		TM_MODE_TRACKING,
 		TM_MODE_CALIBRATION,
 	} currentMode;
 	
-	// eye detection
-	bool detectEyes();
+	// face & eye tracking
+	static const int img_width = 640;
+	static const int img_height = 480;
+	ofVideoGrabber cam;
+	ofxFaceTracker tracker;
 	static const int numEyePositions = 4;
 	static const int eyeTemplateSize = 25;
-	static const int maxEyeHistory = 10;
-	std::deque<cv::Point2f> eyeHistories[numEyePositions];
-	cv::CascadeClassifier faceCascade;
-	ASMModel asmModel;
-	void readASMModel(ASMModel &asmModel, string modelPath);
 	cv::Point2f eyePositions[numEyePositions];
 	
 	// eye tracking
+    void detectEyeCorner();
 	bool trackEyes();
 	static const int searchWindowSize = 30;
-	Mat initTemplates[numEyePositions], prevTemplates[numEyePositions];
+    cv::Mat initTemplates[numEyePositions], prevTemplates[numEyePositions];
 	
 	// calibration
-	static const int calibPointsNumX = 7;
-	static const int calibPointsNumY = 7;
+	static const int calibPointsNumX = 8;
+	static const int calibPointsNumY = 5;
 	int calibPointsNumAll;
 	int calibPtIdx;
 	static const int calibPointsRadMax = 200;
-	static const float calibPointsRadSpeed = 250;
-	int calibPtRad;
+	static const int calibPointsRadSpeed = 250;
+	float calibPtRad;
 	int calibAreaX, calibAreaY;
 	std::vector<cv::Point2f> calibrationPoints;
 	std::vector<cv::Mat> calibrationEyes;
